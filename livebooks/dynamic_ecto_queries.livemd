@@ -1,0 +1,141 @@
+# Elixir
+
+```elixir
+Mix.install([
+  {:ecto_sql, "~> 3.9"},
+  {:ecto, "~> 3.9"},
+  {:postgrex, "~> 0.16.5"},
+  {:phoenix_html, "~> 3.3"},
+  {:phoenix, "~> 1.7"},
+  {:phoenix_live_view, "~> 0.18.17"},
+  {:kino_db, "~> 0.2.1"},
+  {:exqlite, "~> 0.11.0"},
+  {:ecto_sqlite3, "~> 0.9.1"}
+])
+```
+
+## Some Used Case
+
+<!-- livebook:{"attrs":{"database_path":"users.db","type":"sqlite","variable":"conn"},"chunks":null,"kind":"Elixir.KinoDB.ConnectionCell","livebook_object":"smart_cell"} -->
+
+```elixir
+opts = [database: "users.db"]
+{:ok, conn} = Kino.start_child({Exqlite, opts})
+```
+
+<!-- livebook:{"attrs":{"cache_query":true,"connection":{"type":"sqlite","variable":"conn"},"query":"CREATE TABLE IF NOT EXISTS users (name STRING, age INT)","result_variable":"result","timeout":null},"chunks":null,"kind":"Elixir.KinoDB.SQLCell","livebook_object":"smart_cell"} -->
+
+```elixir
+result = Exqlite.query!(conn, "CREATE TABLE IF NOT EXISTS users (name STRING, age INT)", [])
+```
+
+<!-- livebook:{"attrs":{"cache_query":true,"connection":{"type":"sqlite","variable":"conn"},"query":"INSERT INTO users(name, age) Values('Nisha',25),('Tim',15),('John',2)","result_variable":"result2","timeout":null},"chunks":null,"kind":"Elixir.KinoDB.SQLCell","livebook_object":"smart_cell"} -->
+
+```elixir
+result2 =
+  Exqlite.query!(
+    conn,
+    "INSERT INTO users(name, age) Values('Nisha',25),('Tim',15),('John',2)",
+    []
+  )
+```
+
+<!-- livebook:{"attrs":{"cache_query":true,"connection":{"type":"sqlite","variable":"conn"},"query":"DELETE from users","result_variable":"result3","timeout":null},"chunks":null,"kind":"Elixir.KinoDB.SQLCell","livebook_object":"smart_cell"} -->
+
+```elixir
+result3 = Exqlite.query!(conn, "DELETE from users", [])
+```
+
+```elixir
+defmodule User do
+  use Ecto.Schema
+  @primary_key false
+  schema "users" do
+    field(:name, :string)
+    field(:age, :integer)
+  end
+end
+
+defmodule Repo do
+  use Ecto.Repo, adapter: Ecto.Adapters.SQLite3, otp_app: :nothing
+end
+
+case Ecto.Repo.all_running() do
+  [_ | _] -> Repo.stop()
+  _ -> []
+end
+
+Repo.start_link(database: "users.db")
+```
+
+```elixir
+import Ecto.Query
+max_age = 24
+min_age = 12
+query = from(u in User, where: u.age > ^min_age and u.age < ^max_age)
+Repo.all(query) |> Kino.DataTable.new()
+```
+
+```elixir
+defmodule BadExample do
+  import Ecto.Query
+
+  def age(min_age, max_age) do
+    query = from(u in User, where: u.age > ^min_age and u.age < ^max_age)
+    Repo.all(query) |> Kino.DataTable.new()
+  end
+end
+
+BadExample.age(nil, 23) |> Kino.DataTable.new()
+```
+
+```elixir
+defmodule UglyExample do
+  import Ecto.Query
+
+  def age(min_age, max_age) when is_nil(min_age) and is_nil(max_age) do
+    query = from(u in User)
+    Repo.all(query)
+  end
+
+  def age(min_age, max_age) when is_nil(min_age) do
+    query = from(u in User, where: u.age < ^max_age)
+    Repo.all(query)
+  end
+
+  def age(min_age, max_age) when is_nil(max_age) do
+    query = from(u in User, where: u.age > ^min_age)
+    Repo.all(query)
+  end
+
+  def age(min_age, max_age) do
+    query = from(u in User, where: u.age < ^max_age and u.age > ^min_age)
+    Repo.all(query)
+  end
+end
+
+UglyExample.age(nil, 23) |> Kino.DataTable.new()
+```
+
+```elixir
+defmodule GoodExample do
+  import Ecto.Query
+
+  def age(min_age, max_age) do
+    query = from(u in User)
+
+    query
+    |> maybe_add_min_age(min_age)
+    |> maybe_add_max_age(max_age)
+    |> Repo.all()
+  end
+
+  defp maybe_add_min_age(query, nil), do: query
+  defp maybe_add_min_age(query, min_age), do: where(query, [u], u.age >= ^min_age)
+
+  defp maybe_add_max_age(query, nil), do: query
+  defp maybe_add_max_age(query, max_age), do: where(query, [u], u.age <= ^max_age)
+end
+
+GoodExample.age(nil, 23) |> Kino.DataTable.new()
+```
