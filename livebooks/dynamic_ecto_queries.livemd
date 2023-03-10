@@ -14,7 +14,7 @@ Mix.install([
 ])
 ```
 
-## Some Used Case
+## Some Use Case
 
 ```elixir
 defmodule User do
