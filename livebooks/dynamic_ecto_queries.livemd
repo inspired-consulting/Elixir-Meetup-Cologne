@@ -16,36 +16,6 @@ Mix.install([
 
 ## Some Used Case
 
-<!-- livebook:{"attrs":{"database_path":"users.db","type":"sqlite","variable":"conn"},"chunks":null,"kind":"Elixir.KinoDB.ConnectionCell","livebook_object":"smart_cell"} -->
-
-```elixir
-opts = [database: "users.db"]
-{:ok, conn} = Kino.start_child({Exqlite, opts})
-```
-
-<!-- livebook:{"attrs":{"cache_query":true,"connection":{"type":"sqlite","variable":"conn"},"query":"CREATE TABLE IF NOT EXISTS users (name STRING, age INT)","result_variable":"result","timeout":null},"chunks":null,"kind":"Elixir.KinoDB.SQLCell","livebook_object":"smart_cell"} -->
-
-```elixir
-result = Exqlite.query!(conn, "CREATE TABLE IF NOT EXISTS users (name STRING, age INT)", [])
-```
-
-<!-- livebook:{"attrs":{"cache_query":true,"connection":{"type":"sqlite","variable":"conn"},"query":"INSERT INTO users(name, age) Values('Nisha',25),('Tim',15),('John',2)","result_variable":"result2","timeout":null},"chunks":null,"kind":"Elixir.KinoDB.SQLCell","livebook_object":"smart_cell"} -->
-
-```elixir
-result2 =
-  Exqlite.query!(
-    conn,
-    "INSERT INTO users(name, age) Values('Nisha',25),('Tim',15),('John',2)",
-    []
-  )
-```
-
-<!-- livebook:{"attrs":{"cache_query":true,"connection":{"type":"sqlite","variable":"conn"},"query":"DELETE from users","result_variable":"result3","timeout":null},"chunks":null,"kind":"Elixir.KinoDB.SQLCell","livebook_object":"smart_cell"} -->
-
-```elixir
-result3 = Exqlite.query!(conn, "DELETE from users", [])
-```
-
 ```elixir
 defmodule User do
   use Ecto.Schema
@@ -65,12 +35,28 @@ case Ecto.Repo.all_running() do
   _ -> []
 end
 
-Repo.start_link(database: "users.db")
+Repo.start_link(database: "anti-aging.db")
+
+[
+  "DROP TABLE IF EXISTS users",
+  "CREATE TABLE users (name STRING, age INT)"
+]
+|> Enum.map(&Ecto.Adapters.SQL.query!(Repo, &1, []))
+
+users = [
+  %{name: "Nisha", age: 21},
+  %{name: "Hans", age: 12},
+  %{name: "Ariadne", age: 23},
+  %{name: "José", age: 42},
+  %{name: "Frank", age: 51}
+]
+
+Repo.insert_all("users", users, [])
 ```
 
 ```elixir
 import Ecto.Query
-max_age = 24
+max_age = 50
 min_age = 12
 query = from(u in User, where: u.age > ^min_age and u.age < ^max_age)
 Repo.all(query) |> Kino.DataTable.new()
