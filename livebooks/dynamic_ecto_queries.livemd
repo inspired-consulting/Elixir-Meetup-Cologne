@@ -4,20 +4,16 @@
 Mix.install([
   {:ecto_sql, "~> 3.9"},
   {:ecto, "~> 3.9"},
-  {:postgrex, "~> 0.16.5"},
-  {:phoenix_html, "~> 3.3"},
-  {:phoenix, "~> 1.7"},
-  {:phoenix_live_view, "~> 0.18.17"},
-  {:kino_db, "~> 0.2.1"},
-  {:exqlite, "~> 0.11.0"},
+  {:kino, "~> 0.8.1"},
   {:ecto_sqlite3, "~> 0.9.1"}
 ])
 ```
+
 ## Try it yourself!
 
 [![Run in Livebook](https://livebook.dev/badge/v1/black.svg)](https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Finspired-consulting%2FElixir-Meetup-Cologne%2Fblob%2Fmain%2Flivebooks%2Fdynamic_ecto_queries.livemd)
 
-## Some Use Case
+## Databse setup
 
 ```elixir
 defmodule User do
@@ -47,70 +43,79 @@ Repo.start_link(database: "anti-aging.db")
 |> Enum.map(&Ecto.Adapters.SQL.query!(Repo, &1, []))
 
 users = [
-  %{name: "Nisha", age: 21},
-  %{name: "Hans", age: 12},
-  %{name: "Ariadne", age: 23},
-  %{name: "José", age: 42},
-  %{name: "Frank", age: 51}
+  %{name: "👶", age: 0},
+  %{name: "🦖", age: 65_000_000},
+  %{name: "🤠", age: 92},
+  %{name: "👧", age: 12},
+  %{name: "👩🏻", age: 42},
+  %{name: "🦄", age: 101}
 ]
 
 Repo.insert_all("users", users, [])
 ```
 
+## Filter by age
+
 ```elixir
 import Ecto.Query
-max_age = 50
-min_age = 12
-query = from(u in User, where: u.age > ^min_age and u.age < ^max_age)
+max_age = 99
+min_age = 21
+query = from(u in User, where: u.age >= ^min_age and u.age <= ^max_age)
 Repo.all(query) |> Kino.DataTable.new()
 ```
+
+![](https://i.giphy.com/media/4PCNGBPKj6De08Fgsc/giphy.webp)
 
 ```elixir
 defmodule BadExample do
   import Ecto.Query
 
-  def age(min_age, max_age) do
+  def by_age(min_age, max_age) do
     query = from(u in User, where: u.age > ^min_age and u.age < ^max_age)
     Repo.all(query) |> Kino.DataTable.new()
   end
 end
 
-BadExample.age(nil, 23) |> Kino.DataTable.new()
+BadExample.by_age(21, nil) |> Kino.DataTable.new()
 ```
+
+![](https://i.giphy.com/media/Nxj5V2uURNzBt6TyWj/giphy.webp)
 
 ```elixir
 defmodule UglyExample do
   import Ecto.Query
 
-  def age(min_age, max_age) when is_nil(min_age) and is_nil(max_age) do
+  def by_age(min_age, max_age) when is_nil(min_age) and is_nil(max_age) do
     query = from(u in User)
     Repo.all(query)
   end
 
-  def age(min_age, max_age) when is_nil(min_age) do
-    query = from(u in User, where: u.age < ^max_age)
+  def by_age(min_age, max_age) when is_nil(min_age) do
+    query = from(u in User, where: u.age <= ^max_age)
     Repo.all(query)
   end
 
-  def age(min_age, max_age) when is_nil(max_age) do
-    query = from(u in User, where: u.age > ^min_age)
+  def by_age(min_age, max_age) when is_nil(max_age) do
+    query = from(u in User, where: u.age >= ^min_age)
     Repo.all(query)
   end
 
-  def age(min_age, max_age) do
-    query = from(u in User, where: u.age < ^max_age and u.age > ^min_age)
+  def by_age(min_age, max_age) do
+    query = from(u in User, where: u.age <= ^max_age and u.age > ^min_age)
     Repo.all(query)
   end
 end
 
-UglyExample.age(nil, 23) |> Kino.DataTable.new()
+UglyExample.by_age(21, nil) |> Kino.DataTable.new()
 ```
+
+![](https://i.giphy.com/media/YaYUGMM8CYA02WW3je/giphy.webp)
 
 ```elixir
 defmodule GoodExample do
   import Ecto.Query
 
-  def age(min_age, max_age) do
+  def by_age(min_age, max_age) do
     query = from(u in User)
 
     query
@@ -126,5 +131,7 @@ defmodule GoodExample do
   defp maybe_add_max_age(query, max_age), do: where(query, [u], u.age <= ^max_age)
 end
 
-GoodExample.age(nil, 23) |> Kino.DataTable.new()
+GoodExample.by_age(21, nil) |> Kino.DataTable.new()
 ```
+
+![](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmIyNTM5ZWY4M2U2YmVhMGQzMzQzYTVmNDY3MWVlYmUyZDgyY2Q4YiZjdD1n/m5B4JzuoIrrcbibbnc/giphy.gif)
