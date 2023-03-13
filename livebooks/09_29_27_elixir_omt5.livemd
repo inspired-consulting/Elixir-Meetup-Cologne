@@ -165,6 +165,7 @@ defmodule GoodExample do
     |> maybe_add_min_age(min_age)
     |> maybe_add_max_age(max_age)
     |> Repo.all()
+    |> dbg()
   end
 
   defp maybe_add_min_age(query, nil), do: query
