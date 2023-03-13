@@ -1,0 +1,186 @@
+# Checking for nil in dynamic ecto queries
+
+```elixir
+Mix.install([
+  {:ecto_sql, "~> 3.9"},
+  {:ecto, "~> 3.9"},
+  {:kino, "~> 0.8.1"},
+  {:ecto_sqlite3, "~> 0.9.1"}
+])
+```
+
+## Try it yourself!
+
+[![Run in Livebook](https://livebook.dev/badge/v1/black.svg)](https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Finspired-consulting%2FElixir-Meetup-Cologne%2Fblob%2Fmain%2Flivebooks%2Fdynamic_ecto_queries.livemd)
+
+<!-- livebook:{"break_markdown":true} -->
+
+In this Livebook we will do dynamic ecto queries for filtering users by age and show you how to check for nil in a bad, ugly, and good way. Enjoy 🙂
+
+## Database setup
+
+Let's set up our database. We chose SQLite3 because it works out of the box in the Livebook environment.
+
+```elixir
+defmodule User do
+  use Ecto.Schema
+  @primary_key false
+  schema "users" do
+    field(:name, :string)
+    field(:age, :integer)
+  end
+end
+
+defmodule Repo do
+  use Ecto.Repo, adapter: Ecto.Adapters.SQLite3, otp_app: :nothing
+end
+
+case Ecto.Repo.all_running() do
+  [_ | _] -> Repo.stop()
+  _ -> []
+end
+
+Repo.start_link(database: "anti-aging.db")
+
+[
+  "DROP TABLE IF EXISTS users",
+  "CREATE TABLE users (name STRING, age INT)"
+]
+|> Enum.map(&Ecto.Adapters.SQL.query!(Repo, &1, []))
+
+users = [
+  %{name: "👶", age: 0},
+  %{name: "🦖", age: 65_000_000},
+  %{name: "🤠", age: 92},
+  %{name: "👧", age: 12},
+  %{name: "👩🏻", age: 42},
+  %{name: "🦄", age: 101}
+]
+
+Repo.insert_all("users", users, [])
+```
+
+## The happy path
+
+The query works perfectly fine if no variable has the value of nil.
+
+```elixir
+import Ecto.Query
+min_age = 21
+max_age = 55
+query = from(u in User, where: u.age >= ^min_age and u.age <= ^max_age)
+Repo.all(query) |> Kino.DataTable.new()
+```
+
+## Checking for nil: the bad way
+
+![](https://i.giphy.com/media/4PCNGBPKj6De08Fgsc/giphy.webp)
+
+<!-- livebook:{"break_markdown":true} -->
+
+As soon as we call the function with nil, it will throw an error 😨
+
+```elixir
+defmodule BadExample do
+  import Ecto.Query
+
+  def by_age(min_age, max_age) do
+    query = from(u in User, where: u.age > ^min_age and u.age < ^max_age)
+    Repo.all(query) |> Kino.DataTable.new()
+  end
+end
+
+BadExample.by_age(21, nil) |> Kino.DataTable.new()
+# BadExample.by_age(nil, 55) |> Kino.DataTable.new()
+# BadExample.by_age(nil, nil) |> Kino.DataTable.new()
+```
+
+## Checking for nil: the ugly way
+
+![](https://i.giphy.com/media/Nxj5V2uURNzBt6TyWj/giphy.webp)
+
+<!-- livebook:{"break_markdown":true} -->
+
+As we have seen above, not checking for nil at all is a bad way to go. Let's check for nil for every possible case.
+
+* min_age = nil
+* max_age = nil
+* min_age = nil & max_age = nil
+
+```elixir
+defmodule UglyExample do
+  import Ecto.Query
+
+  def by_age(min_age, max_age) when is_nil(min_age) and is_nil(max_age) do
+    query = from(u in User)
+    Repo.all(query)
+  end
+
+  def by_age(min_age, max_age) when is_nil(min_age) do
+    query = from(u in User, where: u.age <= ^max_age)
+    Repo.all(query)
+  end
+
+  def by_age(min_age, max_age) when is_nil(max_age) do
+    query = from(u in User, where: u.age >= ^min_age)
+    Repo.all(query)
+  end
+
+  def by_age(min_age, max_age) do
+    query = from(u in User, where: u.age <= ^max_age and u.age > ^min_age)
+    Repo.all(query)
+  end
+end
+
+UglyExample.by_age(21, nil) |> Kino.DataTable.new()
+# UglyExample.by_age(nil, 55) |> Kino.DataTable.new()
+# UglyExample.by_age(nil, nil) |> Kino.DataTable.new()
+```
+
+This works fine, but it's a cumbersome and unelegant way. Elixir can do better, and we can, too 🤩
+
+## Checking for nil: the good way
+
+![](https://i.giphy.com/media/YaYUGMM8CYA02WW3je/giphy.webp)
+
+<!-- livebook:{"break_markdown":true} -->
+
+Here, we are implenting two helper functions:
+
+* maybe_add_min_age
+* maybe_add_max_age
+
+Inside those helper functions, we do our nil checks (loc: 13, loc: 16).
+
+Before we will do the actual query on the database, we pipe our query through those helper functions.
+
+```elixir
+defmodule GoodExample do
+  import Ecto.Query
+
+  def by_age(min_age, max_age) do
+    query = from(u in User)
+
+    query
+    |> maybe_add_min_age(min_age)
+    |> maybe_add_max_age(max_age)
+    |> Repo.all()
+  end
+
+  defp maybe_add_min_age(query, nil), do: query
+  defp maybe_add_min_age(query, min_age), do: where(query, [u], u.age >= ^min_age)
+
+  defp maybe_add_max_age(query, nil), do: query
+  defp maybe_add_max_age(query, max_age), do: where(query, [u], u.age <= ^max_age)
+end
+
+GoodExample.by_age(21, nil) |> Kino.DataTable.new()
+# GoodExample.by_age(nil, 55) |> Kino.DataTable.new()
+# GoodExample.by_age(nil, nil) |> Kino.DataTable.new()
+```
+
+For us, this way of coding looks more explicit and way more elegant 🥳 What do you say?
+
+<!-- livebook:{"break_markdown":true} -->
+
+![](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmIyNTM5ZWY4M2U2YmVhMGQzMzQzYTVmNDY3MWVlYmUyZDgyY2Q4YiZjdD1n/m5B4JzuoIrrcbibbnc/giphy.gif)
