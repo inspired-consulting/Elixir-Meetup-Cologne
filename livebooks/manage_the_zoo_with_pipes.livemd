@@ -48,18 +48,25 @@ brown_birds = Enum.filter(birds, is_brown?)
 
 ## The pipe operator
 
-The pipe operator is written as `|>`. It links the result of the expression on the left side of the operator to the function on the left side. It does this by passing the result of the expression to the functions as first parameter. The following:
+The pipe operator is written as `|>`. It links the result of the expression on the left side of the pipe to the function on the left side. It does this by passing the result of the expression to the functions as first argument. The following:
 
 ```elixir
-IO.puts("These animals live in the zoo #{animals}")
+length(animals)
 ```
 
 Is therefore the same as this:
 
 ```elixir
-"These animals live in the zoo #{animals}"
-|> IO.puts()
+animals |> length()
 ```
+
+A function that is piped into can have multiple arguments. The pipe will always provide the result from the expression to the left of the pipe as first argument to the function on the rigt of the pipe. The other arguments must be provided manually.
+
+```elixir
+animals |> Enum.filter(is_bird?)
+```
+
+Here the list of animals is provided to the Enum.filter/2 function as the first argument and the variable is_bird? is provided manually as second argument.
 
 ## Compose the steps using pipes
 
