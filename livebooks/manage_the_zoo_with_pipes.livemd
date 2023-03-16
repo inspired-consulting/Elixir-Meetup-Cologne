@@ -26,7 +26,7 @@ end
 animals = ["🦉", "🦉", "🦩", "🦩", "🦩", "🐻", "🐻"]
 ```
 
-## How many brown birds there are?
+## How many brown birds are there?
 
 ##### Filter all the birds
 
@@ -48,7 +48,7 @@ brown_birds = Enum.filter(birds, is_brown?)
 
 ## The pipe operator
 
-The pipe operator is writen as `|>`. It links the result of the expression on the left site of the operator to the function on the left site. It does this by passing the result of the expression to the functions as first parameter. The following:
+The pipe operator is written as `|>`. It links the result of the expression on the left side of the operator to the function on the left side. It does this by passing the result of the expression to the functions as first parameter. The following:
 
 ```elixir
 IO.puts("These animals live in the zoo #{animals}")
@@ -63,7 +63,7 @@ Is therefore the same as this:
 
 ## Compose the steps using pipes
 
-With this in mind we can compose the steps to determine the number of brown birds with pipes.
+With this in mind, the steps to determine the number of brown birds can be composed with pipes.
 
 ```elixir
 animals
@@ -75,7 +75,7 @@ animals
 
 ## Compose with pipes
 
-Pipes are a great tool to compose functions that solve small proplems to solve bigger problems while keeping the code clean and easy to understand.
+Pipes are a great tool to compose functions that solve small prorblems to solve bigger problems while keeping the code clean and easy to understand.
 
 ```elixir
 count_brown = fn animals_to_count ->
