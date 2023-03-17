@@ -1,0 +1,15 @@
+# Howto livebook
+
+[Livebooks](https://livebook.dev/) are a way to create interactive documents with elixir. Under the hood they are markdown files that contain elixir code, like this very file.
+The livebook application provides an environment for editig and rendering livebooks. Conceptually Livebooks are similar to [jupyter notebooks](https://jupyter.org/) but use elixir instead of python.
+
+In order to start using Livebooks you need an instance of the livebook application. As the livebook application is a webapp there are multiple ways to run it.
+
+- Use the app for macOS or Windows (recomanded)
+- Use a cloud provider
+- Use docker
+
+You can find installation instructions in the official (readme)[https://github.com/livebook-dev/livebook#installation].
+
+```elixir
+```
