@@ -13,6 +13,7 @@ Mix.install([
 
 [![Run in Livebook](https://livebook.dev/badge/v1/black.svg)](https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Finspired-consulting%2FElixir-Meetup-Cologne%2Fblob%2Fmain%2Flivebooks%2Fdynamic_ecto_queries.livemd)
 
+
 <!-- livebook:{"break_markdown":true} -->
 
 In this Livebook we will do dynamic ecto queries for filtering users by age and show you how to check for nil in a bad, ugly, and good way. Enjoy 🙂
@@ -81,8 +82,6 @@ Repo.all(query) |> Kino.DataTable.new()
 
 <!-- livebook:{"break_markdown":true} -->
 
-
-
 ```elixir
 defmodule BadExample do
   import Ecto.Query
@@ -146,7 +145,10 @@ end
 
 ```elixir
 UglyExample.by_age(21, 55) |> Kino.DataTable.new()
+
 ```
+
+![](https://i.giphy.com/media/YaYUGMM8CYA02WW3je/giphy.webp)
 
 ```elixir
 UglyExample.by_age(nil, 55) |> Kino.DataTable.new()

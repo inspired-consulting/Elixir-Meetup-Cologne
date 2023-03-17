@@ -1,0 +1,116 @@
+# Manage the zoo with pipes
+
+## Try it yourself!
+
+[![Run in Livebook](https://livebook.dev/badge/v1/black.svg)](https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2Finspired-consulting%2FElixir-Meetup-Cologne%2Fblob%2Fmain%2Flivebooks%2Fmanage_the_zoo_with_pipes.livemd)
+
+## Functions to categorize animals
+
+```elixir
+is_bird? = fn
+  "🦉" -> true
+  "🦩" -> true
+  _other -> false
+end
+
+is_brown? = fn
+  "🦉" -> true
+  "🐻" -> true
+  _other -> false
+end
+```
+
+## We have the following animals in our zoo
+
+```elixir
+animals = ["🦉", "🦉", "🦩", "🦩", "🦩", "🐻", "🐻"]
+```
+
+## How many brown birds are there?
+
+##### Filter all the birds
+
+```elixir
+birds = Enum.filter(animals, is_bird?)
+```
+
+##### Filter all brown animals from the birds
+
+```elixir
+brown_birds = Enum.filter(birds, is_brown?)
+```
+
+##### Count the brown birds and print the result
+
+```elixir
+"Number of brown birds: #{length(brown_birds)}"
+```
+
+## The pipe operator
+
+The pipe operator is written as `|>`. It links the result of the expression on the left side of the pipe to the function on the left side. It does this by passing the result of the expression to the functions as first argument. The following:
+
+```elixir
+length(animals)
+```
+
+Is therefore the same as this:
+
+```elixir
+animals |> length()
+```
+
+A function that is piped into can have multiple arguments. The pipe will always provide the result from the expression to the left of the pipe as first argument to the function on the rigt of the pipe. The other arguments must be provided manually.
+
+```elixir
+animals |> Enum.filter(is_bird?)
+```
+
+Here the list of animals is provided to the Enum.filter/2 function as the first argument and the variable is_bird? is provided manually as second argument.
+
+## Compose the steps using pipes
+
+With this in mind, the steps to determine the number of brown birds can be composed with pipes.
+
+```elixir
+animals
+|> Enum.filter(is_bird?)
+|> Enum.filter(is_brown?)
+|> length()
+|> then(fn number_of_brown_birds -> "Number of brown birds: #{number_of_brown_birds}" end)
+```
+
+## Compose with pipes
+
+Pipes are a great tool to compose functions that solve small problems to solve bigger problems while keeping the code clean and easy to understand.
+
+```elixir
+count_brown = fn animals_to_count ->
+  animals_to_count
+  |> Enum.filter(is_brown?)
+  |> length
+end
+
+print_count = fn count, category ->
+  IO.puts("Number of #{category}: #{count}")
+end
+
+animals
+|> length()
+|> print_count.("animals")
+
+animals
+|> count_brown.()
+|> print_count.("brown animals")
+
+animals
+|> Enum.filter(is_bird?)
+|> count_brown.()
+|> print_count.("brown birds")
+
+animals
+|> Enum.reject(is_bird?)
+|> count_brown.()
+|> print_count.("brown none-birds")
+```
+
