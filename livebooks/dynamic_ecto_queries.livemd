@@ -66,9 +66,12 @@ The query works perfectly fine if no variable has the value of nil.
 
 ```elixir
 import Ecto.Query
+
 min_age = 21
 max_age = 55
+
 query = from(u in User, where: u.age >= ^min_age and u.age <= ^max_age)
+
 Repo.all(query) |> Kino.DataTable.new()
 ```
 
@@ -78,7 +81,7 @@ Repo.all(query) |> Kino.DataTable.new()
 
 <!-- livebook:{"break_markdown":true} -->
 
-As soon as we call the function with nil, it will throw an error 😨
+
 
 ```elixir
 defmodule BadExample do
@@ -86,13 +89,21 @@ defmodule BadExample do
 
   def by_age(min_age, max_age) do
     query = from(u in User, where: u.age > ^min_age and u.age < ^max_age)
-    Repo.all(query) |> Kino.DataTable.new()
+    Repo.all(query)
   end
 end
+```
 
-BadExample.by_age(21, nil) |> Kino.DataTable.new()
-# BadExample.by_age(nil, 55) |> Kino.DataTable.new()
-# BadExample.by_age(nil, nil) |> Kino.DataTable.new()
+As long as we call the function with no nil value, it works perfectly fine.
+
+```elixir
+BadExample.by_age(21, 55) |> Kino.DataTable.new()
+```
+
+But as soon as we call the function with nil, it will throw an error 😨
+
+```elixir
+BadExample.by_age(nil, 55) |> Kino.DataTable.new()
 ```
 
 ## Checking for nil: the ugly way
@@ -131,10 +142,14 @@ defmodule UglyExample do
     Repo.all(query)
   end
 end
+```
 
-UglyExample.by_age(21, nil) |> Kino.DataTable.new()
-# UglyExample.by_age(nil, 55) |> Kino.DataTable.new()
-# UglyExample.by_age(nil, nil) |> Kino.DataTable.new()
+```elixir
+UglyExample.by_age(21, 55) |> Kino.DataTable.new()
+```
+
+```elixir
+UglyExample.by_age(nil, 55) |> Kino.DataTable.new()
 ```
 
 This works fine, but it's a cumbersome and unelegant way. Elixir can do better, and we can, too 🤩
@@ -165,7 +180,6 @@ defmodule GoodExample do
     |> maybe_add_min_age(min_age)
     |> maybe_add_max_age(max_age)
     |> Repo.all()
-    |> dbg()
   end
 
   defp maybe_add_min_age(query, nil), do: query
@@ -174,10 +188,14 @@ defmodule GoodExample do
   defp maybe_add_max_age(query, nil), do: query
   defp maybe_add_max_age(query, max_age), do: where(query, [u], u.age <= ^max_age)
 end
+```
 
-GoodExample.by_age(21, nil) |> Kino.DataTable.new()
-# GoodExample.by_age(nil, 55) |> Kino.DataTable.new()
-# GoodExample.by_age(nil, nil) |> Kino.DataTable.new()
+```elixir
+GoodExample.by_age(21, 55) |> Kino.DataTable.new()
+```
+
+```elixir
+GoodExample.by_age(nil, 55) |> Kino.DataTable.new()
 ```
 
 For us, this way of coding looks more explicit and way more elegant 🥳 What do you say?
