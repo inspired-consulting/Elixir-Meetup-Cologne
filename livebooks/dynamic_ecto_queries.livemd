@@ -80,8 +80,6 @@ Repo.all(query) |> Kino.DataTable.new()
 
 ![](https://i.giphy.com/media/4PCNGBPKj6De08Fgsc/giphy.webp)
 
-<!-- livebook:{"break_markdown":true} -->
-
 ```elixir
 defmodule BadExample do
   import Ecto.Query
@@ -145,10 +143,7 @@ end
 
 ```elixir
 UglyExample.by_age(21, 55) |> Kino.DataTable.new()
-
 ```
-
-![](https://i.giphy.com/media/YaYUGMM8CYA02WW3je/giphy.webp)
 
 ```elixir
 UglyExample.by_age(nil, 55) |> Kino.DataTable.new()
@@ -203,5 +198,3 @@ GoodExample.by_age(nil, 55) |> Kino.DataTable.new()
 For us, this way of coding looks more explicit and way more elegant 🥳 What do you say?
 
 <!-- livebook:{"break_markdown":true} -->
-
-![](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmIyNTM5ZWY4M2U2YmVhMGQzMzQzYTVmNDY3MWVlYmUyZDgyY2Q4YiZjdD1n/m5B4JzuoIrrcbibbnc/giphy.gif)
