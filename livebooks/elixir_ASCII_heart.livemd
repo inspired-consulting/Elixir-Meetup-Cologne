@@ -12,7 +12,7 @@ You'll find a step-by-step breakdown after the code. Let's go!
 defmodule Love do
   @love "Elixir "
 
-  def character_at(@love, x, y) do
+  def character_at(x, y) do
     index = rem(x - y, String.length(@love))
     char = String.slice(@love, index..index)
 
@@ -28,7 +28,7 @@ defmodule Love do
     -13..13
     |> Enum.map(fn y ->
       -30..30
-      |> Enum.map(fn x -> Love.character_at(@love, x, y) end)
+      |> Enum.map(fn x -> Love.character_at(x, y) end)
       |> Enum.join("")
     end)
     |> Enum.reverse()
@@ -43,9 +43,9 @@ IO.puts(Love.heart())
 
 The code is split into 5 parts:
 
-1. The definition of the module `WeLove` contains the global variable `love`, and the functions `character_at` and `heart`.
+1. The definition of the module `WeLove` contains the module attribute `love`, and the functions `character_at` and `heart`.
 
-2. The global variable `love` stores the value "Elixir ". Of course, you can change the value to whatever you want. However, paying homage to our beloved Elixir lang seemed kinda fitting to start with 🙃.
+2. The module attribute `love` stores the value "Elixir ". Of course, you can change the value to whatever you want. However, paying homage to our beloved Elixir lang seemed kinda fitting to start with 🙃.
 
 3. The function `character_at` is a helper function that takes three arguments: "@love" is expected to be a string, while "x" and "y" are expected to be integers.
 
