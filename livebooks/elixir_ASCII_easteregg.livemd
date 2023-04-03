@@ -73,3 +73,7 @@ The code is split into 5 parts:
 * joins all the rows with a newline character to form the complete egg shape.
 
 1. The last section of the code calls the `patch_together` function and prints the result to the terminal.
+
+<!-- livebook:{"break_markdown":true} -->
+
+![](images/ASCII_egg_elixir.png)
