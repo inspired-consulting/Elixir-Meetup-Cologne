@@ -1,0 +1,76 @@
+# Elixir goes ASCII Art ¯\_(ツ)_/¯
+
+## We💜Elixir, right?
+
+The aim is to create a heart-shaped pattern in your terminal that is made up of characters from the given string _Elixir_.
+
+The following code achieves that by using a combination of mathematical equations and string manipulation techniques.
+
+You'll find a step-by-step breakdown after the code. Let's go!
+
+```elixir
+defmodule WeLove do
+  @love String.graphemes("Elixir ")
+
+  def character_at(x, y) do
+    index = rem(x - y, length(@love))
+    char = Enum.at(@love, index)
+
+    case math_power(x, y) do
+      true -> char
+      false -> " "
+    end
+  end
+
+  def math_power(x, y) do
+    :math.pow(:math.pow(x * 0.05, 2) + :math.pow(y * 0.1, 2) - 1, 3) -
+      :math.pow(x * 0.05, 2) * :math.pow(y * 0.1, 3) <= 0
+  end
+
+  def patch_together() do
+    -15..15
+    |> Enum.map(fn y ->
+      -30..30
+      |> Enum.map(fn x -> WeLove.character_at(x, y) end)
+      |> Enum.join("")
+    end)
+    |> Enum.reverse()
+    |> Enum.join("\n")
+  end
+end
+
+IO.puts(WeLove.patch_together())
+```
+
+## Let's break it down
+
+The definition of the module `WeLove` contains the module attribute `love`, and the functions `character_at`, `math_power`, and `patch_together`.
+
+The code is split into 5 parts:
+
+1. The module attribute `love` stores the string "Elixir ", chopped into its chars. (… of course, you can change the value to whatever you want, however, paying homage to our beloved Elixir lang seemed kinda fitting to start with 🙃)
+
+2. The function `character_at` calculates the index of the character in the @love string using the modulo operator (which returns the remainder of the division of its first argument by its second argument) and the length of the string.
+
+3. The function `math_power` takes two arguments, x and y, and returns a boolean, indicating whether the point (x, y) is inside the heart shape or not.
+
+* This is the basic mathematical formula for our heart: ((x)² + (y)^2 - 1)³ - (x)² * (y)³ <= 0
+* The ((x)² + (y)² - 1)³ part describes a circle, the (x)² * (y)³ part descibes a cube.
+* Subtract the (x)² * (y)³ part from the ((x)² + (y)² - 1)³ part and less-than-or-equal it to 0 to get the shape of a heart.
+* To play around with this math part, visit: <https://www.wolframalpha.com/input?i=++%28%28x+*+0.05%29%5E2+%2B+%28y+*+0.1%29%5E2+-+1%29%5E3+-+%28x+*+0.05%29%5E2+*+%28y+*+0.1%29%5E3+%3C%3D+0>
+
+1. The function `patch_together` is the main function that creates the heart shape. It does so by:
+
+* maps over a range of y values, and for each y value, again maps over a range of x values in order to create a row of characters for that specific y value.
+
+* joins the characters in each of those rows to form a string.
+
+* reverses the order of all the rows to make the heart point upwards.
+
+* joins all the rows with a newline character to form the complete heart shape.
+
+1. The last section of the code calls the `patch_together` function and prints the result to the terminal.
+
+<!-- livebook:{"break_markdown":true} -->
+
+![](images/elixir_ascii_heart.png)
