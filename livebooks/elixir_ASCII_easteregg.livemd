@@ -22,12 +22,8 @@ defmodule EasterEgg do
     end
   end
 
-  def math_power(x, y) do
-    case y > 0 do
-      true -> :math.pow(x / 2.5, 2) + :math.pow(y / 2, 2) <= 100
-      false -> :math.pow(x / 2.5, 2) + :math.pow(y / 1, 2) <= 100
-    end
-  end
+  def math_power(x, y) when y > 0, do: :math.pow(x / 2.5, 2) + :math.pow(y / 2, 2) <= 100
+  def math_power(x, y), do: :math.pow(x / 2.5, 2) + :math.pow(y / 1, 2) <= 100
 
   def patch_together() do
     -13..23
