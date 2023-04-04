@@ -11,6 +11,9 @@ In order to start using Livebooks you need an instance of the livebook applicati
 
 You can find installation instructions in the official (readme)[https://github.com/livebook-dev/livebook#installation].
 
+After you have set up your livebook instance this livebook can be imported by following this link.
+[![Run in Livebook](https://livebook.dev/badge/v1/black.svg)](https://livebook.dev/run?url=https%3A%2F%2Fraw.githubusercontent.com%2Finspired-consulting%2FElixir-Meetup-Cologne%2Fmain%2Flivebooks%2FREADME.livemd)
+
 You can use all standard markdown features plus some extras. The app will render the markdown for you and will execute all elixir code blocks like the one below.
 
 ```elixir
