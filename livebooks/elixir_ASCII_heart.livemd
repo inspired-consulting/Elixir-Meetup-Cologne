@@ -1,4 +1,4 @@
-# Elixir goes ASCII Art ¯\_(ツ)_/¯
+# Elixir goes ASCII Art ¯\_(ツ)_/¯: The Heart.
 
 ## We💜Elixir, right?
 
@@ -55,11 +55,14 @@ The code is split into 5 parts:
 3. The function `math_power` takes two arguments, x and y, and returns a boolean, indicating whether the point (x, y) is inside the heart shape or not.
 
 * This is the basic mathematical formula for our heart: ((x)² + (y)^2 - 1)³ - (x)² * (y)³ <= 0
+
 * The ((x)² + (y)² - 1)³ part describes a circle, the (x)² * (y)³ part descibes a cube.
+
 * Subtract the (x)² * (y)³ part from the ((x)² + (y)² - 1)³ part and less-than-or-equal it to 0 to get the shape of a heart.
+
 * To play around with this math part, visit: <https://www.wolframalpha.com/input?i=++%28%28x+*+0.05%29%5E2+%2B+%28y+*+0.1%29%5E2+-+1%29%5E3+-+%28x+*+0.05%29%5E2+*+%28y+*+0.1%29%5E3+%3C%3D+0>
 
-1. The function `patch_together` is the main function that creates the heart shape. It does so by:
+4. The function `patch_together` is the main function that creates the heart shape. It does so by:
 
 * maps over a range of y values, and for each y value, again maps over a range of x values in order to create a row of characters for that specific y value.
 
@@ -69,8 +72,8 @@ The code is split into 5 parts:
 
 * joins all the rows with a newline character to form the complete heart shape.
 
-1. The last section of the code calls the `patch_together` function and prints the result to the terminal.
+5. The last section of the code calls the `patch_together` function and prints the result to the terminal.
 
 <!-- livebook:{"break_markdown":true} -->
 
-![](images/elixir_ascii_heart.png)
+![](images/ASCII_heart.png)
