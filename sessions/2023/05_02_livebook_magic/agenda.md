@@ -4,8 +4,8 @@
 ## Agenda
 
 - Welcome
-- Short introductions
 - Order Pizza
+- Short introductions
 - Topic livebooks by Mehdi
 - Eat Pizza
 - Thank you all!
